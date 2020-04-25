@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Video Game Paaaarty!</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-grid.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-reboot.min.css" />
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="assets/css/animate.css" />
+        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/party.css" />
+	</head>
+	<body>
+        <div id="umbrella" class="flex center-horizontal center-vertical">
+            <form name="login-form" class="login-form animated" action="" method="post">
+        
+                <div class="header">
+                <h1>Registria 2000!</h1>
+                <span>Enter name for scoreboard</span>
+                </div>
+            
+                <div class="content">
+                    <input name="name" type="text" class="input username" placeholder="Name" autofocus="true" />
+                    <div class="user-icon"></div>
+                </div>
+        
+                <div class="footer">
+                    <a href="#" class="button">Save</a>
+                </div>
+            
+            </form>
+        </div>
+
+        <!-- Scripts -->
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/createjs.min.js"></script>
+        <script>
+            const form = $(".login-form")
+            form.hide()
+            setTimeout(function() {
+                form.on("animationend", function() { 
+                    form.off("animationend")
+                    const textbox = $(".login-form input[name]")
+                    textbox.focus()
+                 })
+                 form.show()
+                 form.addClass("animated flipInY")
+            }, 1000)
+        </script>
+	</body>
+</html>

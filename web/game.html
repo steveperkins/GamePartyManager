@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Video Game Paaaarty!</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-grid.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-reboot.min.css" />
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="assets/css/animate.css" />
+        <link rel="stylesheet" href="assets/css/main.css">
+        <link rel="stylesheet" href="assets/css/party.css" />
+	</head>
+	<body style="background-color: black">
+        <canvas id="canvas" style="width: 100%; height: 100%; border: 1px solid blue" width="2048" height="1152"></canvas>
+
+        <!-- Scripts -->
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/createjs.min.js"></script>
+        <script>
+            let stage
+            let manifest
+            let assetLoader
+            let canvasWidth
+            let canvasHeight
+            let space
+            let ship
+            let dockingBay
+            let animating = false
+            let dockingBayScaleTimeoutHandle
+
+            function init() {
+                stage = new createjs.Stage("canvas")
+                // Stash canvas width and height for later calculations:
+                canvasWidth = document.getElementById("canvas").width
+                canvasHeight = document.getElementById("canvas").height
+                manifest = [
+                    { src: "x-wing.png", id: "ship" },
+                    { src: "starrysky.jpg", id: "background" },
+                    { src: "docking-bay.gif", id: "dockingBay" }
+                ]
+                assetLoader = new createjs.LoadQueue(false)
+                assetLoader.addEventListener("complete", onLoaded)
+                assetLoader.loadManifest(manifest, true, "assets/game/")
+                
+                createjs.Sound.on("fileload", function() { 
+                    const props = new createjs.PlayPropsConfig().set({loop: -1, volume: 0.2, pan: -.8, startTime: 1000, duration: 8 * 1000})
+                    createjs.Sound.play("ambiance", props) 
+                });
+
+                createjs.Sound.alternateExtensions = ["mp3"]
+                createjs.Sound.registerSounds([
+                    { id: "ambiance", src: "spaceship-ambiance.mp3" },
+                    { id: "thruster", src: "thruster.mp3" }
+                ], "assets/game/")
+                // createjs.Sound.registerSound("assets/game/thruster.mp3", "thruster", 2)
+            }
+
+            function onLoaded() {
+                space = new createjs.Bitmap(assetLoader.getResult("background"))
+                stage.addChild(space)
+
+                dockingBay = new createjs.Bitmap(assetLoader.getResult("dockingBay"))
+                dockingBay.scaleX = canvasWidth / dockingBay.image.width
+                dockingBay.scaleY = dockingBay.scaleX
+                dockingBay.regX = 368 / 3
+                dockingBay.regy = 0
+                stage.addChild(dockingBay)
+                
+                ship = new createjs.Bitmap(assetLoader.getResult("ship"))
+
+                ship.x = 1000
+                ship.y = canvasHeight / 2
+                // Set registration point to image center for rotation
+                ship.regX = ship.image.width / 2
+                ship.regY = ship.image.height / 2
+
+                stage.addChild(ship)
+
+                createjs.Ticker.framerate = 60
+                createjs.Ticker.addEventListener("tick", onTick)
+
+                createjs.Tween.get(space, { loop: true })
+                    .to({ x: -2, y: -1 }, 100, createjs.Ease.sineIn)
+                    .to({ x: -1, y: 0 }, 100, createjs.Ease.sineIn)
+                    .to({ x: 0, y: -1 }, 100, createjs.Ease.sineIn)
+                    .to({ x: -1, y: -1 }, 100, createjs.Ease.sineIn)
+                stage.update()
+
+                dockingBayScaleTimeoutHandle = setInterval(function() {
+                    const newXScale = dockingBay.scaleX += 0.006
+                    const newYScale = dockingBay.scaleY += 0.006
+                    console.log("new scale " + newYScale)
+                    createjs.Tween.get(dockingBay, { override: true })
+                        .to({ scaleX: newXScale, scaleY: newYScale, x: dockingBay.x - newXScale * 0.8, y: (dockingBay.y - (newYScale / 2))  }, 90)
+                }, 70)
+            }
+
+            const MAX_SPEED = 40
+            // let lastPositive = true
+            // const jitter = 1.5
+            // const jitterCompensation = -0.8
+            // TODO Speed is determined by how quickly fluid is going through the flow meter. We need to find out what the max speed is.
+            let horizontalSpeed = 1
+            let direction = undefined
+            function onTick() {
+                if (horizontalSpeed < 0) { horizontalSpeed = 0 }
+                else if (horizontalSpeed > MAX_SPEED) { horizontalSpeed = MAX_SPEED }
+
+                let easing = createjs.Ease.sineIn
+                let x = ship.x
+                let rotation = 0
+                if (direction === "left") {
+                    x -= horizontalSpeed
+                    rotation = 0 - horizontalSpeed
+                } else if (direction === "right") {
+                    x += horizontalSpeed
+                    rotation = horizontalSpeed
+                }
+
+                if (x <= 0) {
+                    x = 0
+                    easing = createjs.Ease.backIn
+                } else if (x >= canvasWidth) {
+                    x = canvasWidth
+                    easing = createjs.Ease.backIn
+                }
+
+                if (!animating && ship.rotation !== rotation) {
+                    rotateShip(rotation)
+                }
+
+                if (!animating) {
+                    animating = true
+                    if (Math.abs(ship.x - x) > 3) {
+                        createjs.Sound.play("thruster", new createjs.PlayPropsConfig().set({ pan: .8, startTime: 0, duration: 100, volume: Math.abs(rotation) / 100 + 0.2 }));
+                    }
+
+                    createjs.Tween.get(ship, { loop: false })
+                        .to({ x: x, y: ship.y + randomBetween(-1, 3) }, 10, easing)
+                        .call(function() {
+                            animating = false
+                        })
+                }
+
+                stage.update()
+            }
+
+            let swap = false
+            function keyboardInput(event) {
+                 if (event.code === "ArrowLeft") {
+                    // TODO Once the water is hooked up we'll know the flow speed every time it changes
+                     direction = "left"
+                } else if (event.code === "ArrowRight") {
+                    direction = "right"
+                } else if (event.code === "ArrowUp") {
+                    horizontalSpeed += 10
+                } else if (event.code === "ArrowDown") {
+                    horizontalSpeed -= 10
+                }
+                return true
+            }
+
+            function rotateShip(rotation) {
+                console.log(`Moving ${rotation} degrees`)
+                animating = true
+                createjs.Tween.get(ship)
+                    .to({ rotation: rotation }, 30)
+                    .call(function() {
+                        animating = false
+                    })
+            }
+
+            function randomBetween(low, high) {
+                return Math.floor(Math.random() * high) + low
+            }
+
+            init()
+
+
+            window.onkeydown = keyboardInput
+        </script>
+	</body>
+</html>
