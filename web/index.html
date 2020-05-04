@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Video Game Paaaarty!</title>
+		<title>The Wedding Games</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
@@ -12,42 +12,114 @@
         <link rel="stylesheet" href="assets/css/main.css">
         <link rel="stylesheet" href="assets/css/party.css" />
 	</head>
-	<body>
-        <div id="umbrella" class="flex center-horizontal center-vertical">
-            <form name="login-form" class="login-form animated" action="" method="post">
-        
+    <body style="background-color: black">
+        <div id="umbrella" style="position: relative">
+            <div id="coverSheet" class="flex" style="position: absolute; z-index: 100; width: 100%; height: 100%">
+                <div style="margin: auto auto;">
+                    <h2>Register Here</h2>
+                    <div style="font-weight: bold; font-size: 150%;">Registration allows your wins to be scored throughout the day today.</div>
+                    <button id="startButton" class="btn btn-danger" onclick="startGame()">Player 1 Start!</button>
+                </div>
+            </div>
+            <form id="registrationForm" class="animated" style="position: absolute; z-index: 50;" onsubmit="event.preventDefault()">
+                <img src="assets/game/wedding-games-header.png" style="display: block; margin-left: auto; margin-right: auto" />
                 <div class="header">
-                <h1>Registria 2000!</h1>
-                <span>Enter name for scoreboard</span>
+                    <h1>You got a high score!</h1>
+                    <span>Enter your name to complete registration</span>
                 </div>
-            
-                <div class="content">
-                    <input name="name" type="text" class="input username" placeholder="Name" autofocus="true" />
-                    <div class="user-icon"></div>
+
+                <div class="form-group">
+                    <input id="playerName" name="name" type="input" class="form-field" placeholder="Name" required autofocus />
+                    <label for="name" class="form-label">Name</label>
                 </div>
-        
-                <div class="footer">
-                    <a href="#" class="button">Save</a>
-                </div>
-            
+                
+                <div id="error"></div>
+                <div id="success"></div>
+                
+                <button class="btn btn-danger" onclick="addPlayer()">Save</button>
             </form>
+
+            <canvas id="canvas" style="width: 100%; height: 100%;" width="2048" height="1152"></canvas>
         </div>
 
         <!-- Scripts -->
         <script src="assets/js/jquery.min.js"></script>
         <script src="assets/js/createjs.min.js"></script>
+        <script src="assets/js/clients/PlayerClient.js"></script>
+        <script src="assets/game/game.js"></script>
         <script>
-            const form = $(".login-form")
-            form.hide()
-            setTimeout(function() {
-                form.on("animationend", function() { 
-                    form.off("animationend")
-                    const textbox = $(".login-form input[name]")
+            const registrationForm = $("#registrationForm")
+            const coverSheet = $("#coverSheet")
+            const canvas = $("#canvas")
+            const playerClient = new PlayerClient()
+
+            registrationForm.hide()
+            
+            const game = new Game("canvas")
+            game.init()
+
+            function startGame() {
+                canvas.show()
+                coverSheet.hide()
+                registrationForm.hide()
+                game.startGame()
+            }
+
+            function gameOver(finishObj) {
+                parent = registrationForm.parent()
+                registrationForm.css("left", `${parent.width() / 2 - registrationForm.width() / 2}px`)
+                registrationForm.css("top", `${parent.height() / 2 - registrationForm.height() / 2}px`)
+                registrationForm.on("animationend", function() { 
+                    registrationForm.off("animationend")
+                    const textbox = $("#registrationForm input[name]")
                     textbox.focus()
                  })
-                 form.show()
-                 form.addClass("animated flipInY")
-            }, 1000)
+                 if (finishObj.won) {
+                    $("#registrationForm .header h1").text("You got a high score!")
+                } else {
+                    $("#registrationForm .header h1").text(`You lost by ${finishObj.lostBy} points!`)
+                }
+                 registrationForm.show()
+                 registrationForm.addClass("animated flipInY")
+            }
+
+            game.onGameOver(gameOver)
+
+            function addPlayer() {
+                showError("")
+
+                const player = {
+                    name: $("#playerName").val()
+                }
+                playerClient.addPlayer(player)
+                    .then(function(data) {
+                        // Send success message to player and clear screen
+                        $("#playerName").val("")
+                        showSuccess("You're now registered!")
+                        setTimeout(reset, 5000)
+                    })
+                    .catch(function(error) {
+                        showError(error)
+                    })
+            }
+
+            function showError(message) {
+                $("#error").text(message)
+            }
+
+            function showSuccess(message) {
+                showError("")
+                $("#success").text(message)
+            }
+
+            function reset() {
+                canvas.hide()
+                registrationForm.hide()
+                coverSheet.show()
+            }
+
+            reset()
+            window.onkeydown = game.keyboardInput
         </script>
 	</body>
 </html>

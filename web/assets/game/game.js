@@ -174,25 +174,23 @@ Game.prototype.rotateShip = function(rotation) {
         })
 }
 
-Game.prototype.onGameWon = function(callback) {
-    _game.onGameWon = callback
-}
-Game.prototype.onGameLost = function(callback) {
-    _game.onGameLost = callback
+Game.prototype.onGameOver = function(callback) {
+    _game.onGameOver = callback
 }
 Game.prototype.gameOver = function() {
     _game.stopAmbiance()
     createjs.Ticker.paused = true
 
+    const result = {}
+
     if (_game.ship.x < _game.canvasWidth / 2) {
         // Close enough to the docking bay to call it good
-        if (_game.onGameWon) {
-            _game.onGameWon()
-        }
+        result.won = true
     } else {
-        if (_game.onGameLost) {
-            _game.onGameLost(_game.ship.x - _game.canvasWidth / 2)
-        }
+            result.lostBy = _game.ship.x - _game.canvasWidth / 2
+    }
+    if (_game.onGameOver) {
+        _game.onGameOver(result)
     }
 }
 

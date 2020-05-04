@@ -74,7 +74,7 @@ export class MiniGameSvc {
         }
 
         const existingGame = await this.dbSvc.getMiniGameByName(game.name)
-        if (existingGame) {
+        if (existingGame && +existingGame.id !== +game.id) {
             res.status(400)
             res.json({ message: "Name already taken - try another", code: "NAME_TAKEN" })
             return
@@ -87,6 +87,30 @@ export class MiniGameSvc {
             res.json(result)
         } catch (e) {
             logger.error(`Game update threw exception!\r\n${JSON.stringify(e)}`)
+            res.status(500)
+            res.json({ message: e.message })
+            return;
+        }
+
+        res.end()
+    }
+
+    /**
+     * Deletes a minigame
+     */
+    delete = async (req: any, res: any): Promise<MiniGame> => {
+        if (!req.params.gameId) {
+            res.status(400)
+            res.json({ message: "Game ID is required", code: "MISSING_ID" })
+            return
+        }
+
+        try {
+            await this.dbSvc.deleteMiniGame(req.params.gameId)
+            res.status(200)
+            res.json({})
+        } catch (e) {
+            logger.error(`Game delete threw exception!\r\n${JSON.stringify(e)}`)
             res.status(500)
             res.json({ message: e.message })
             return;

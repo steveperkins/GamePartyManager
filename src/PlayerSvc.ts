@@ -92,6 +92,30 @@ export class PlayerSvc {
     }
 
     /**
+     * Deletes a player
+     */
+    delete = async(req: any, res: any): Promise<void> => {
+        if (!req.params.playerId) {
+            res.status(400)
+            res.json({ message: "Player ID is required", code: "MISSING_PLAYER_ID" })
+            return
+        }
+
+        try {
+            await this.dbSvc.deletePlayer(req.params.playerId)
+            res.status(200)
+            res.json({})
+        } catch (e) {
+            logger.error(`Player update threw exception!\r\n${JSON.stringify(e)}`)
+            res.status(400)
+            res.json({ message: e.message })
+            return;
+        }
+
+        res.end()
+    }
+
+    /**
      * Gets all players
      */
     getAll = async (req: any, res: any): Promise<Player[]> => {

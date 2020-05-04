@@ -1,57 +1,115 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Video Game Paaaarty! Admin</title>
+		<title>Admin</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
         <link rel="stylesheet" href="assets/css/bootstrap-grid.min.css" />
         <link rel="stylesheet" href="assets/css/bootstrap-reboot.min.css" />
+        <link rel="stylesheet" href="assets/css/mdb.lite.min.css" />
         <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
         <link rel="stylesheet" href="assets/css/animate.css" />
-        <link rel="stylesheet" href="assets/css/main.css">
-        <link rel="stylesheet" href="assets/css/party.css" />
+        <link rel="stylesheet" href="assets/css/admin.css" />
 	</head>
 	<body>
-        <div id="umbrella" class="flex center-horizontal center-vertical">
-            <form name="login-form" class="login-form animated" action="" method="post">
-        
+        <div id="umbrella" class="flex col center-horizontal center-vertical">
+            <div id="miniGames">
                 <div class="header">
-                <h1>Registria 2000!</h1>
-                <span>Enter name for scoreboard</span>
+                    <h1>Games</h1>
                 </div>
             
-                <div class="content">
-                    <input name="name" type="text" class="input username" placeholder="Name" autofocus="true" />
-                    <div class="user-icon"></div>
-                </div>
-        
-                <div class="footer">
-                    <a href="#" class="button">Save</a>
+                <table id="miniGamesTable" class="table table-bordered table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Max Score</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <h3 class="heading">Add game</h3>
+                <form class="form-inline" onsubmit="event.preventDefault()">
+                    <input name="name" class="form-control" type="text" placeholder="Name" autofocus="true" />
+                    <input name="maxScore" class="form-control" type="text" placeholder="Max score"/>
+                    <button id="addMiniGameBtn" class="btn btn-success" onclick="adminMiniGames.addGame()">Add</button>
+                </form>
+                <div class="error text-danger"></div>
+            </div>
+
+            <div id="players">
+                <div class="header">
+                    <h1>Players</h1>
                 </div>
             
-            </form>
+                <table id="playersTable" class="table table-bordered table-striped table-hover table-condensed">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <h3 class="heading">Add player</h3>
+                <form class="form-inline" onsubmit="event.preventDefault()">
+                    <input name="name" class="form-control" type="text" placeholder="Name" autofocus="true" />
+                    <button id="addPlayerBtn" class="btn btn-success" onclick="adminPlayers.add()">Add</button>
+                </form>
+                <div class="error text-danger"></div>
+            </div>
         </div>
 
         <!-- Scripts -->
         <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/bstable.js"></script>
         <script src="assets/js/models.js"></script>
         <script src="assets/js/clients/MiniGameClient.js"></script>
+        <script src="assets/js/clients/PlayerClient.js"></script>
+        <script src="assets/js/AdminMiniGames.js"></script>
+        <script src="assets/js/AdminPlayers.js"></script>
+
         <script>
-            const form = $(".login-form")
-            form.hide()
-            setTimeout(function() {
-                form.on("animationend", function() { 
-                    const textbox = $(".login-form input[name]")
-                    textbox.focus()
-                 })
-                 form.show()
-                 form.addClass("animated flipInY")
-            }, 1000)
-            const miniGameClient = new MiniGameClient()
-            miniGameClient.getAll(function(response) {
-                console.log("fucks " + response)
-            })
+
+            // jQuery has no PUT or DELETE shortcuts for some reason
+            $.put = function(url, data, callback, type){
+                if ( $.isFunction(data) ){
+                    type = type || callback,
+                    callback = data,
+                    data = {}
+                }
+
+                return $.ajax({
+                    url: url,
+                    type: "PUT",
+                    success: callback,
+                    data: data,
+                    contentType: type
+                });
+            }
+
+            $.delete = function(url, data, callback, type){
+                if ( $.isFunction(data) ){
+                    type = type || callback,
+                        callback = data,
+                        data = {}
+                }
+
+                return $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    success: callback,
+                    data: data,
+                    contentType: type
+                });
+            }
+
+            const adminMiniGames = new AdminMiniGames("miniGames")
+            const adminPlayers = new AdminPlayers("playersTable")
+        
         </script>
 	</body>
 </html>

@@ -57,6 +57,35 @@ export class ScoreSvc {
     }
 
     /**
+     * Deletes a score report
+     */
+    delete = async(req: any, res: any) : Promise<void> => {
+        if (!req.params.playerId) {
+            res.status(400)
+            res.json({ message: "Player ID is required", code: "MISSING_PLAYER_ID" })
+            return
+        }
+        if (!req.params.gameid) {
+            res.status(400)
+            res.json({ message: "Game ID is required", code: "MISSING_GAME_ID" })
+            return
+        }
+
+        try {
+            await this.dbSvc.deleteScoreReport({ playerid: req.params.playerId, gameid: req.params.gameid } as ScoreReport)
+            res.status(200)
+            res.json({})
+        } catch (e) {
+            logger.error(`Score report delete threw exception!\r\n${JSON.stringify(e)}`)
+            res.status(500)
+            res.json({ message: e.message })
+            return;
+        }
+
+        res.end()
+    }
+
+    /**
      * Gets all player scores across all games
      */
     getAll = async (req: any, res: any): Promise<HighScores> => {

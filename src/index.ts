@@ -35,16 +35,19 @@ try {
    // Player endpoints
    app.post("/api/player", playerSvc.insert)
    app.put("/api/player/:playerId", playerSvc.update)
+   app.delete("/api/player/:playerId", playerSvc.delete)
    app.get("/api/players", playerSvc.getAll)
 
    // Minigame endpoints
    app.post("/api/minigame", miniGameSvc.insert)
    app.put("/api/minigame/:gameId", miniGameSvc.update)
    app.get("/api/minigames", miniGameSvc.getAll)
+   app.delete("/api/minigame/:gameId", miniGameSvc.delete)
 
    // Score endpoints
    app.post("/api/score", scoreSvc.insert)
    app.get("/api/scores", scoreSvc.getAll)
+   app.delete("/api/score/:playerId/:gameId", scoreSvc.delete)
 
    const serverPort = 8080
    const server = app.listen(serverPort, () => {

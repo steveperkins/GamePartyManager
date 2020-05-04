@@ -1,29 +1,43 @@
 function PlayerClient () {
-    this.rootUrl = "api/player"
-    this.getAll = (callback) => {
-        $.get(`${this.rootUrl}s`, function(data, status) {
-            if (status !== "success") {
-                throw data.message
-            }
-            callback(data)
-        })
-    }
+    PlayerClient.prototype.rootUrl = "api/player"
+}
 
-    this.addPlayer = (player, callback) => {
-        $.post(`${this.rootUrl}`, player, function(data, status) {
-            if (status !== "success") {
-                throw data.message
-            }
-            callback(data)
-        })
-    }
+PlayerClient.prototype.getAll = function() {
+    return new Promise((successCallback, errorCallback) => {
+        $.get(`${this.rootUrl}s`, this.successHandler(successCallback, errorCallback))
+            .fail(this.failureHandler(errorCallback))
+    })
+}
 
-    this.updatePlayer = (player, callback) => {
-        $.put(`${this.rootUrl}/${player.id}`, player, function(data, status) {
-            if (status !== "success") {
-                throw data.message
-            }
-            callback(data)
-        })
+PlayerClient.prototype.addPlayer = function(player) {
+    return new Promise((successCallback, errorCallback) => {
+        $.post(`${this.rootUrl}`, player, this.successHandler(successCallback, errorCallback))
+            .fail(this.failureHandler(errorCallback))
+    })
+}
+
+PlayerClient.prototype.updatePlayer = function(player) {
+    return new Promise((successCallback, errorCallback) => {
+        $.put(`${this.rootUrl}/${player.id}`, player, this.successHandler(successCallback, errorCallback))
+            .fail(this.failureHandler(errorCallback))
+    })
+}
+
+PlayerClient.prototype.deletePlayer = function(playerId) {
+    return new Promise((successCallback, errorCallback) => {
+        $.delete(`${this.rootUrl}/${playerId}`, this.successHandler(successCallback, errorCallback))
+            .fail(this.failureHandler(errorCallback))
+    })
+}
+
+PlayerClient.prototype.successHandler = function(successCallback) {
+    return function(data, status) {
+        successCallback(data)
+    }
+}
+
+PlayerClient.prototype.failureHandler = function(errorCallback) {
+    return function(data, status) {
+        errorCallback(data.responseJSON.message)
     }
 }

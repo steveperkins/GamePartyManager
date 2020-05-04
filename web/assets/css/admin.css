@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo&display=swap');
+@font-face {
+    font-family: Barcade;
+    src: url("../fonts/BarcadeExpanded.otf") format("opentype");
+}
+@font-face {
+    font-family: GamePlayed;
+    src: url("../fonts/GamePlayed.ttf") format("truetype");
+}
+
+body {
+	font-family: 'Arimo';
+}
+
+.flex {
+	display: -webkit-flex;
+	display: flex;
+}
+
+.row {
+	-webkit-flex-direction: row;
+	flex-direction: row;
+}
+
+.col {
+	-webkit-flex-direction: column;
+	flex-direction: column;
+}
+
+.center-horizontal {
+	-webkit-justify-content: center;
+  	justify-content: center;
+}
+
+.center-vertical {
+	-webkit-align-items: center;
+  	align-items: center;
+}
+
+.space-between {
+	-webkit-justify-content: space-between;
+  	justify-content: space-between;
+}
+
+.space-around {
+	-webkit-justify-content: space-around;
+	justify-content: space-around;
+}
+
+.header {
+  font-family: "Barcade"
+}
+
+.heading {
+	font-family: GamePlayed;
+}
