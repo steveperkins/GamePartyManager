@@ -1,11 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Arimo&display=swap');
 @font-face {
-    font-family: Barcade;
-    src: url("../fonts/BarcadeExpanded.otf") format("opentype");
+    font-family: Celtic;
+    src: url("../fonts/Celtic.ttf") format("truetype");
 }
-@font-face {
-    font-family: GamePlayed;
-    src: url("../fonts/GamePlayed.ttf") format("truetype");
+
+body {
+	background-image: url(../../images/wow-blurb.png);
+	background-repeat: no-repeat;
+	background-position: center top;
+	font-size: 200%;
+	background-color: #44525b;
+}
+
+#umbrella {
+	top: 500px;
+    left: -64px;
+}
+
+#selections {
+	font-family: "Celtic";
+}
+
+h4 {
+	font-size: 100%;
 }
 
 .flex {

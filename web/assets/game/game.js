@@ -37,6 +37,7 @@ Game.prototype.init = function(readyCallback) {
 
     createjs.Sound.alternateExtensions = ["mp3"]
     createjs.Sound.registerSounds([
+        { id: "whoosh", src: "whoosh.mp3" },
         { id: "ambiance", src: "spaceship-ambiance.mp3" },
         { id: "thruster", src: "thruster.mp3" }
     ], "assets/game/")
@@ -58,8 +59,10 @@ Game.prototype.stopAmbiance = function() {
 }
 
 Game.prototype.startGame = function() {
-    _game.stage.removeAllChildren();
-    _game.stage.update();
+    _game.stage.removeAllChildren()
+    _game.stage.update()
+
+    createjs.Sound.play("whoosh")
 
     _game.space = new createjs.Bitmap(_game.assetLoader.getResult("background"))
     _game.stage.addChild(_game.space)
@@ -137,7 +140,7 @@ Game.prototype.onTick = function() {
     if (!_game.animating) {
         _game.animating = true
         if (Math.abs(_game.ship.x - x) > 3) {
-            createjs.Sound.play("thruster", new createjs.PlayPropsConfig().set({ pan: .8, startTime: 0, duration: 100, volume: Math.abs(rotation) / 100 + 0.2 }));
+            createjs.Sound.play("thruster", new createjs.PlayPropsConfig().set({ pan: .8, startTime: 0, duration: 100, volume: Math.abs(rotation) / 100 + 0.2 }))
         }
 
         createjs.Tween.get(_game.ship, { loop: false })

@@ -29,12 +29,12 @@ const INSERT_SCORE_REPORT_SQL = `INSERT INTO score_report (playerid, gameid, sco
     WHERE score_report.playerid = $1 AND score_report.gameid = $2`
 const DELETE_SCORE_REPORT_SQL = "DELETE FROM score_report WHERE score_report.playerid = $1 AND score_report.gameid = $2"
 
-const GET_HIGH_SCORES_SQL = `SELECT p.name, SUM(sr.score), COUNT(mg.id)
+const GET_HIGH_SCORES_SQL = `SELECT p.name, SUM(sr.score) AS score, COUNT(mg.id) AS gamesPlayed
     FROM player p
     JOIN score_report sr ON p.id = sr.playerid
     JOIN mini_game mg ON sr.gameid = mg.id
     GROUP BY p.id
-    ORDER BY SUM(sr.score)`
+    ORDER BY SUM(sr.score) DESC`
 
 export class DbSvc {
     private pool: Pool;

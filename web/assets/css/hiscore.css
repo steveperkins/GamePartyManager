@@ -8,6 +8,14 @@
     src: url("../fonts/GamePlayed.ttf") format("truetype");
 }
 
+body {
+  background-color: black;
+  background-image: url(../../images/diablo3.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top
+}
+
 .flex {
 	display: -webkit-flex;
 	display: flex;
@@ -43,10 +51,29 @@
 	justify-content: space-around;
 }
 
-.header {
-  font-family: "Barcade"
+table {
+  background-color: rgb(18, 42, 63, 0.5)
+}
+h1 {
+	font-family: "Barcade";
+	font-size: 650%;
+	margin-bottom: 10%;
+	color: #F8B800;
 }
 
-.heading {
-	font-family: GamePlayed;
+h2 {
+	font-family: "GamePlayed";
+	font-size: 300%;
+  color: #0040F8; 
+}
+
+.score {
+  font-family: "GamePlayed";
+	font-size: 250%;
+  color: #E000F8;
+  text-shadow: -0.5px -0.5px #ffdada;
+}
+
+.score.alt {
+  color: #C6FF91;
 }

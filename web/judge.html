@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Game Judge</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-grid.min.css" />
+        <link rel="stylesheet" href="assets/css/bootstrap-reboot.min.css" />
+        <link rel="stylesheet" href="assets/css/mdb.lite.min.css" />
+        <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+        <link rel="stylesheet" href="assets/css/animate.css" />
+        <link rel="stylesheet" href="assets/css/judge.css" />
+	</head>
+	<body>
+        <div id="umbrella" class="flex col center-horizontal center-vertical">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="gamesDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" autofocus="true">
+                      Game
+                    </button>
+                    <div id="gamesDropdown" class="dropdown-menu" aria-labelledby="gamesDropdownButton">
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="playersDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Player
+                    </button>
+                    <div id="playersDropdown" class="dropdown-menu" aria-labelledby="playersDropdownButton">
+                    </div>
+                </div>
+
+            <div id="selections">
+                <div>Game: <span id="selectedGame"></span></div>
+                <div>Player: <span id="selectedPlayer"></span></div>
+            </div>
+
+            <form class="form-inline" onsubmit="event.preventDefault()">
+                <input name="score" class="form-control" type="text" placeholder="Score" />
+                <button id="Submit" class="btn btn-success" onclick="submitScore()">Add</button>
+            </form>
+            <div>
+                <h4 id="message" style="color: darkgreen"></h4>
+                <h4 id="error" style="color: darkred"></h4>
+            </div>
+        </div>
+
+        <!-- Scripts -->
+        <script src="assets/js/jquery.min.js"></script>
+        <script src="assets/js/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/createjs.min.js"></script>
+        <script src="assets/js/models.js"></script>
+        <script src="assets/js/clients/MiniGameClient.js"></script>
+        <script src="assets/js/clients/PlayerClient.js"></script>
+        <script src="assets/js/clients/ScoreClient.js"></script>
+
+        <script>
+            const gameClient = new MiniGameClient()
+            const playerClient = new PlayerClient()
+            const scoreClient = new ScoreClient()
+            
+            const selectedPlayerElement = $("#selectedPlayer")
+            const selectedGameElement = $("#selectedGame")
+            const scoreElement = $("input[name=score]")
+            const errorElement = $("#error")
+            const messageElement = $("#message")
+
+            let selectedGame
+            let selectedPlayer
+
+            createjs.Sound.registerSounds([
+                { id: "cheer", src: "cheer.mp3" },
+                { id: "click", src: "click.mp3" },
+                { id: "error", src: "error.mp3" }
+            ], "assets/sounds/")
+
+            gameClient.getAll()
+                .then((games) => {
+                    let html = ""
+                    for (const game of games) {
+                        html += `<a class="dropdown-item" onclick="setGame({ id: ${game.id}, name: '${game.name}' })">${game.name}</a>`
+                    }
+                    $("#gamesDropdown").append(html)
+                })
+
+            playerClient.getAll()
+                .then((players) => {
+                    let html = ""
+                    for (const player of players) {
+                        html += `<a class="dropdown-item" onclick="setPlayer({ id: ${player.id}, name: '${player.name}' })">${player.name}</a>`
+                    }
+                    $("#playersDropdown").append(html)
+                })
+
+            function setGame(game) {
+                clearMessages()
+                selectedGame = game
+                selectedGameElement.text(selectedGame.name)
+                createjs.Sound.play("click")
+            }
+
+            function setPlayer(player) {
+                clearMessages()
+                selectedPlayer = player
+                selectedPlayerElement.text(selectedPlayer.name)
+                createjs.Sound.play("click")
+            }
+
+            function submitScore() {
+                clearMessages()
+
+                if (!selectedGame) {
+                    errorElement.text("Game is required")
+                    return
+                }
+                if (!selectedPlayer) {
+                    errorElement.text("Player is required")
+                    createjs.Sound.play("error")
+                    return
+                }
+                let score = scoreElement.val()
+                if (!score) {
+                    errorElement.text("Score is required")
+                    createjs.Sound.play("error")
+                    return
+                }
+                score = +score
+                if (!Number.isFinite(score)) {
+                    errorElement.text("Score must be a number")
+                    createjs.Sound.play("error")
+                    return
+                }
+                if (score < 0) {
+                    errorElement.text("Score must positive")
+                    createjs.Sound.play("error")
+                    return
+                }
+
+                scoreClient.add(selectedPlayer.id, selectedGame.id, score) 
+                    .then((result) => {
+                        messageElement.text(`${score} points for ${selectedPlayer.name} added!`)
+                        selectedGameElement.text("")
+                        selectedPlayerElement.text("")
+                        scoreElement.val("")
+                        createjs.Sound.play("cheer")
+                    })
+                    .catch((err) => {
+                        errorElement.text(err)
+                    })
+            }
+
+            function clearMessages() {
+                errorElement.text("")
+                messageElement.text("")
+            }
+        </script>
+	</body>
+</html>
